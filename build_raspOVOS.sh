@@ -5,6 +5,75 @@
 # scroll back and figure out what went wrong.
 set -e
 
+# Rename the default 'pi' user if the current user is not 'pi'.
+# Updates system configurations related to user, home directory, password, and group.
+if [ "$USER" != "pi" ]; then
+  # 1. Change the username in /etc/passwd
+  echo "Renaming user in /etc/passwd..."
+  sed -i "s/^pi:/$USER:/g" "/etc/passwd"
+
+  # 2. Change the group name in /etc/group
+  echo "Renaming user in /etc/group..."
+  sed -i "s/\bpi\b/$USER/g" "/etc/group"
+
+  # 3. Rename the home directory from /home/pi to /home/newuser
+  echo "Renaming home directory..."
+  # replace "pi"" with "$USER" in /etc/passwd
+  sed -i "s|pi:|$USER:|g" "/etc/passwd"
+  mv "/home/pi" "/home/$USER"
+
+  # 4. Change ownership of the new home directory
+  echo "Updating file ownership..."
+  chown -R $TUID:$TGID "/home/$USER"
+
+  # 5. Change the password in /etc/shadow
+  echo "Changing user password to $PASSWORD..."
+  NEW_HASHED_PASSWORD=$(openssl passwd -6 "$PASSWORD")
+  echo "hashed password: $NEW_HASHED_PASSWORD..."
+  sed -i "s#^pi:.*#$USER:$NEW_HASHED_PASSWORD:18720:0:99999:7:::#g" "/etc/shadow"
+
+  # 6. don't let raspbian force to change username on first boot
+  echo "Disabling first boot user setup wizard..."
+  echo "$USER:$NEW_HASHED_PASSWORD" > /boot/firmware/userconf.txt
+  chmod 600 /boot/firmware/userconf.txt
+
+  # 7. Add the new user to the sudo group
+  echo "Adding $USER to the sudo group..."
+  sed -i "/^sudo:/s/pi/$USER/" /etc/group
+
+  echo "User has been renamed, added to sudo group, and password updated."
+fi
+
+# Function to add a user to a specific group in /etc/group.
+# If the group does not exist, it outputs an error message.
+# If the user is not already a member of the group, it adds the user.
+add_user_to_group() {
+    local user=$1
+    local group=$2
+
+    # Check if the group exists
+    if ! grep -q "^$group:" /etc/group; then
+        echo "Group $group doesn't exist"
+        return 1
+    fi
+
+    # Add the user to the group if not already a member
+    if ! grep -q "^$group:.*\b$user\b" /etc/group; then
+        echo "Adding $user to $group"
+        sed -i "/^$group:/s/$/,$user/" /etc/group
+    else
+        echo "$user is already in $group"
+    fi
+}
+
+# Add the current user to the 'ovos' group.
+echo "Adding $USER to the ovos group..."
+# Create the 'ovos' group if it doesn't exist
+if ! getent group ovos > /dev/null; then
+    groupadd ovos
+fi
+add_user_to_group $USER ovos
+
 # Retrieve the GID of the 'ovos' group
 GROUP_FILE="/etc/group"
 TGID=$(awk -F: -v group="ovos" '$1 == group {print $3}' "$GROUP_FILE")
@@ -17,7 +86,7 @@ fi
 
 echo "The GID for 'ovos' is: $TGID"
 
-# Parse the UID directly from /etc/passwd
+# Parse the UID of the current user from /etc/passwd
 PASSWD_FILE="/etc/passwd"
 TUID=$(awk -F: -v user="$USER" '$1 == user {print $3}' "$PASSWD_FILE")
 
@@ -29,197 +98,103 @@ fi
 
 echo "The UID for '$USER' is: $TUID"
 
+# Update package list and install necessary system tools.
+# Installs required packages and purges unnecessary ones.
+echo "Updating base system..."
+apt-get update
+# NOTE: zram and mpd need to be installed here otherwise the cmd will hang prompting user about replacing files from overlays
+apt-get install -y --no-install-recommends jq git unzip curl build-essential fake-hwclock userconf-pi fbi mosh systemd-zram-generator mpd
 
-# Update package list and install necessary tools
-echo "Installing system packages..."
-apt-get install -y --no-install-recommends mpv libssl-dev libfann-dev portaudio19-dev libpulse-dev
+# Copy raspOVOS overlay to the system.
+echo "Copying raspOVOS overlay..."
+cp -rv /mounted-github-repo/overlays/base/* /
+# Ensure the correct permissions for binaries
+chmod +x /usr/libexec/ovos*
+chmod +x /usr/local/bin/ovos*
 
-# splashscreen
-echo "Creating OVOS splashscreen..."
-mkdir -p /opt/ovos
-cp -v /mounted-github-repo/services/splashscreen.png /opt/ovos/splashscreen.png
-cp -v /mounted-github-repo/services/splashscreen.service /etc/systemd/system/splashscreen.service
-chmod 644 /etc/systemd/system/splashscreen.service
-ln -s /etc/systemd/system/splashscreen.service /etc/systemd/system/multi-user.target.wants/splashscreen.service
+echo "Installing audio packages..."
+apt-get install -y --no-install-recommends pipewire pipewire-alsa pipewire-pulse alsa-utils pulseaudio-utils portaudio19-dev libpulse-dev libasound2-dev
 
-echo "Creating OVOS login ASCII art..."
-cp -v /mounted-github-repo/tuning/etc_issue /etc/issue
+# NOTE: upmpdcli will only work after the overlays due to trusted keys being added there
+echo "Installing extra system packages..."
+apt-get install -y --no-install-recommends swig python3-dev python3-pip libssl-dev libfann-dev dirmngr python3-libcamera python3-kms++ libcap-dev kdeconnect mpv i2c-tools
 
-echo "Creating default OVOS XDG paths..."
-mkdir -p /home/$USER/.config/mycroft
-mkdir -p /home/$USER/.local/share/OpenVoiceOS
-mkdir -p /home/$USER/.local/share/mycroft
-mkdir -p /home/$USER/.cache/mycroft/
-mkdir -p /home/$USER/.cache/ovos_gui/
-mkdir -p /home/$USER/.local/state/mycroft
-mkdir -p /etc/mycroft
-mkdir -p /etc/OpenVoiceOS
+# Install dependencies for system OVOS and related tools.
+echo "Installing uv and sdnotify..."
+pip install sdnotify uv --break-system-packages
 
-echo "Ensuring log file permissions for ovos group..."
-chown -R $TUID:$TGID /home/$USER/.local/state/mycroft
-chmod -R 2775 /home/$USER/.local/state/mycroft
+# Modify /etc/fstab for performance optimization.
+echo "Tuning /etc/fstab..."
+bash /mounted-github-repo/scripts/setup_fstab.sh
 
-# add bashrc and company
-echo "Creating aliases and cli login screen..."
-cp -v /mounted-github-repo/tuning/.bashrc /home/$USER/.bashrc
-cp -v /mounted-github-repo/tuning/.bash_aliases /home/$USER/.bash_aliases
-cp -v /mounted-github-repo/tuning/.logo.sh /home/$USER/.logo.sh
-cp -v /mounted-github-repo/tuning/.cli_login.sh /home/$USER/.cli_login.sh
+echo "Updating ovos-i2csound and raspovos-audio-setup"
+bash /mounted-github-repo/scripts/update.sh
 
-echo "Creating system level mycroft.conf..."
-cp -v /mounted-github-repo/mycroft.conf /etc/mycroft/mycroft.conf
-
-# copy default skill settings.json
-echo "Configuring default skill settings.json..."
-mkdir -p /home/$USER/.config/mycroft/skills
-cp -rv /mounted-github-repo/settings/* /home/$USER/.config/mycroft/skills/
-
-
-# setup ovos-i2csound
-echo "Installing ovos-i2csound..."
-apt-get install -y --no-install-recommends i2c-tools
-
-git clone https://github.com/OpenVoiceOS/ovos-i2csound /tmp/ovos-i2csound
-
-cp /tmp/ovos-i2csound/i2c.conf /etc/modules-load.d/i2c.conf
-cp /tmp/ovos-i2csound/bcm2835-alsa.conf /etc/modules-load.d/bcm2835-alsa.conf
-cp /tmp/ovos-i2csound/i2csound.service /etc/systemd/system/i2csound.service
-cp /tmp/ovos-i2csound/ovos-i2csound /usr/libexec/ovos-i2csound
-cp /tmp/ovos-i2csound/99-i2c.rules /usr/lib/udev/rules.d/99-i2c.rules
-
-chmod 644 /etc/systemd/system/i2csound.service
-chmod +x /usr/libexec/ovos-i2csound
-
-ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
-
-echo "Installing raspovos-audio-setup..."
-apt-get install -y --no-install-recommends pulseaudio-utils
-git clone https://github.com/OpenVoiceOS/raspovos-audio-setup /tmp/raspovos-audio-setup
-cp "/tmp/raspovos-audio-setup/autoconfigure_soundcard.service" "/etc/systemd/system/autoconfigure_soundcard.service"
-cp "/tmp/raspovos-audio-setup/combine_sinks.service" "/etc/systemd/system/combine_sinks.service"
-cp "/tmp/raspovos-audio-setup/ovos-audio-setup" "/usr/local/bin/ovos-audio-setup"
-cp "/tmp/raspovos-audio-setup/update-audio-sinks" "/usr/libexec/update-audio-sinks"
-cp "/tmp/raspovos-audio-setup/soundcard_autoconfigure" "/usr/libexec/soundcard_autoconfigure"
-cp "/tmp/raspovos-audio-setup/usb-autovolume" "/usr/libexec/usb-autovolume"
-chmod +x "/usr/local/bin/ovos-audio-setup"
-chmod +x "/usr/libexec/update-audio-sinks"
-chmod +x "/usr/libexec/soundcard_autoconfigure"
-chmod +x "/usr/libexec/usb-autovolume"
-
-ln -s /etc/systemd/system/autoconfigure_soundcard.service /etc/systemd/system/multi-user.target.wants/autoconfigure_soundcard.service
-
+# Install admin phal package and its dependencies.
 echo "Installing admin phal..."
 pip install sdnotify ovos-bus-client ovos-phal ovos-PHAL-plugin-system -c $CONSTRAINTS --break-system-packages
 
-cp -v /mounted-github-repo/services/ovos-admin-phal.service /etc/systemd/system/
-cp -v /mounted-github-repo/services/ovos-systemd-admin-phal /usr/libexec/ovos-systemd-admin-phal
-chmod 644 /etc/systemd/system/ovos-admin-phal.service
-ln -s /etc/systemd/system/ovos-admin-phal.service /etc/systemd/system/multi-user.target.wants/ovos-admin-phal.service
-
-echo "Adding ntp sync signal..."
-# emit "system.clock.synced" to the bus
-mkdir -p /etc/systemd/system/systemd-timesyncd.service.d/
-cp -v /mounted-github-repo/services/ovos-clock-sync.service /etc/systemd/system/systemd-timesyncd.service.d/ovos-clock-sync.conf
-cp -v /mounted-github-repo/services/ovos-clock-sync /usr/libexec/ovos-clock-sync
-
-echo "Adding ssh enabled/disabled signals..."
-mkdir -p /etc/systemd/system/ssh.service.d
-cp -v /mounted-github-repo/services/ovos-ssh-signal.service /etc/systemd/system/ssh.service.d/ovos-ssh-change-signal.conf
-cp -v /mounted-github-repo/services/ovos-ssh-disabled-signal /usr/libexec/ovos-ssh-disabled-signal
-cp -v /mounted-github-repo/services/ovos-ssh-enabled-signal /usr/libexec/ovos-ssh-enabled-signal
-
-echo "Adding messagebus signals..."
-cp -v /mounted-github-repo/services/ovos-reboot-signal.service /etc/systemd/system/ovos-reboot-signal.service
-cp -v /mounted-github-repo/services/ovos-shutdown-signal.service /etc/systemd/system/ovos-shutdown-signal.service
-ln -s /etc/systemd/system/ovos-reboot-signal.service /etc/systemd/system/multi-user.target.wants/ovos-reboot-signal.service
-ln -s /etc/systemd/system/ovos-shutdown-signal.service /etc/systemd/system/multi-user.target.wants/ovos-shutdown-signal.service
-cp -v /mounted-github-repo/services/ovos-stop /usr/libexec/ovos-stop
-cp -v /mounted-github-repo/services/ovos-restart-signal /usr/libexec/ovos-restart-signal
-cp -v /mounted-github-repo/services/ovos-reboot-signal /usr/libexec/ovos-reboot-signal
-cp -v /mounted-github-repo/services/ovos-shutdown-signal /usr/libexec/ovos-shutdown-signal
-cp -v /mounted-github-repo/services/ovos-ocp-pause-signal /usr/libexec/ovos-ocp-pause-signal
-cp -v /mounted-github-repo/services/ovos-ocp-play-signal /usr/libexec/ovos-ocp-play-signal
-cp -v /mounted-github-repo/services/ovos-ocp-stop-signal /usr/libexec/ovos-ocp-stop-signal
-
-chmod +x /usr/libexec/ovos-stop \
-         /usr/libexec/ovos-restart-signal \
-         /usr/libexec/ovos-reboot-signal \
-         /usr/libexec/ovos-shutdown-signal \
-         /usr/libexec/ovos-ocp-pause-signal \
-         /usr/libexec/ovos-ocp-play-signal \
-         /usr/libexec/ovos-ocp-stop-signal
-
-echo "Installing OVOS Rust Messagebus..."
-bash /mounted-github-repo/packages/setup_rustbus.sh
-
-# Create virtual environment for ovos
+# Create and activate a virtual environment for OVOS.
 echo "Creating virtual environment..."
 mkdir -p /home/$USER/.venvs
 python3 -m venv --system-site-packages /home/$USER/.venvs/ovos
-
-# Activate the virtual environment
 source /home/$USER/.venvs/ovos/bin/activate
 
+# Install additional Python dependencies within the virtual environment.
 uv pip install --no-progress wheel cython -c $CONSTRAINTS
 
+# Install ggwave in the virtual environment.
 echo "Installing ggwave..."
-uv pip install --no-progress /mounted-github-repo/packages/ggwave-0.4.2-cp311-cp311-linux_aarch64.whl
+# NOTE: update this wheel if python version changes
+uv pip install --no-progress https://whl.smartgic.io/ggwave-0.4.2-cp311-cp311-linux_aarch64.whl
 
-# install OVOS in venv
+# Install OVOS dependencies in the virtual environment.
 echo "Installing OVOS..."
 uv pip install --no-progress --pre ovos-docs-viewer ovos-utils[extras] ovos-dinkum-listener[extras,linux,onnx] tflite_runtime ovos-audio-transformer-plugin-ggwave ovos-phal ovos-audio[extras] ovos-gui ovos-core[lgpl,plugins] -c $CONSTRAINTS
 
+# Install essential skills for OVOS.
 echo "Installing skills..."
 uv pip install --no-progress --pre ovos-core[skills-essential,skills-audio,skills-media,skills-internet,skills-extra]
 
+# Install PHAL plugins for OVOS.
 echo "Installing PHAL plugins..."
 uv pip install --no-progress --pre ovos-phal[extras,linux,mk1] ovos-PHAL-plugin-dotstar ovos-phal-plugin-camera
 
+# Install Spotify-related plugins for OVOS.
 echo "Installing OVOS Spotify..."
 uv pip install --no-progress --pre ovos-media-plugin-spotify ovos-skill-spotify
 
-# some skills import from these libs and dont have them as dependencies
-# just until that is fixed...
+# Install deprecated OVOS packages for compatibility with older skills.
 echo "Installing deprecated OVOS packages for compat..."
 uv pip install --no-progress --pre ovos-lingua-franca ovos-backend-client -c $CONSTRAINTS
 
-echo "Caching nltk resources..."
-cp -rv /mounted-github-repo/packages/nltk_data /home/$USER/
+# Configure user groups for audio management.
+echo "Configuring audio..."
+add_user_to_group $USER audio
+add_user_to_group $USER pipewire
+if getent group rtkit > /dev/null 2>&1; then
+    add_user_to_group $USER rtkit
+fi
 
-# no balena for now, let's use ggwave instead
-#echo "Installing Balena wifi plugin..."
-#uv pip install --no-progress --pre ovos-PHAL-plugin-balena-wifi ovos-PHAL-plugin-wifi-setup -c $CONSTRAINTS
+# Enable necessary system services.
+echo "Enabling system services..."
+chmod 644 /etc/systemd/system/kdeconnect.service
+chmod 644 /etc/systemd/system/ovos-admin-phal.service
+chmod 644 /etc/systemd/system/i2csound.service
+chmod 644 /etc/systemd/system/splashscreen.service
+ln -s /etc/systemd/system/ovos-admin-phal.service /etc/systemd/system/multi-user.target.wants/ovos-admin-phal.service
+ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
+ln -s /etc/systemd/system/sshd.service /etc/systemd/system/multi-user.target.wants/
+ln -s /etc/systemd/system/splashscreen.service /etc/systemd/system/multi-user.target.wants/splashscreen.service
+ln -s /etc/systemd/system/kdeconnect.service /etc/systemd/system/multi-user.target.wants/kdeconnect.service
+ln -s /usr/lib/systemd/system/mpd.service /etc/systemd/system/multi-user.target.wants/mpd.service
+ln -s /usr/lib/systemd/system/systemd-zram-setup@.service /etc/systemd/system/multi-user.target.wants/systemd-zram-setup@zram0.service
 
-echo "Downloading default wake word model..."
-# Download precise-lite model
-wget https://github.com/OpenVoiceOS/precise-lite-models/raw/master/wakewords/en/hey_mycroft.tflite -P /home/$USER/.local/share/precise_lite/
+# TODO - investigate better audio setup mechanism
+# ln -s /etc/systemd/system/autoconfigure_soundcard.service /etc/systemd/system/multi-user.target.wants/autoconfigure_soundcard.service
 
-echo "Setting up systemd..."
-# copy system scripts over
-cp -v /mounted-github-repo/services/ovos-systemd-skills /usr/libexec/ovos-systemd-skills
-cp -v /mounted-github-repo/services/ovos-systemd-messagebus /usr/libexec/ovos-systemd-messagebus
-cp -v /mounted-github-repo/services/ovos-systemd-audio /usr/libexec/ovos-systemd-audio
-cp -v /mounted-github-repo/services/ovos-systemd-listener /usr/libexec/ovos-systemd-listener
-cp -v /mounted-github-repo/services/ovos-systemd-phal /usr/libexec/ovos-systemd-phal
-cp -v /mounted-github-repo/services/ovos-systemd-gui /usr/libexec/ovos-systemd-gui
-cp -v /mounted-github-repo/services/ovos-librespot /usr/libexec/ovos-librespot
-
-mkdir -p /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-skills.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-messagebus.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-audio.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-listener.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-phal.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-gui.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-ggwave.service /home/$USER/.config/systemd/user/
-cp -v /mounted-github-repo/services/ovos-spotify.service /home/$USER/.config/systemd/user/
-
-# Set permissions for services
+# Enable user systemd services.
 chmod 644 /home/$USER/.config/systemd/user/*.service
-chmod +x /usr/libexec/ovos-*
-
-# Enable services manually by creating symbolic links
 mkdir -p /home/$USER/.config/systemd/user/default.target.wants/
 ln -s /home/$USER/.config/systemd/user/ovos.service /home/$USER/.config/systemd/user/default.target.wants/ovos.service
 ln -s /home/$USER/.config/systemd/user/ovos-skills.service /home/$USER/.config/systemd/user/default.target.wants/ovos-skills.service
@@ -231,9 +206,27 @@ ln -s /home/$USER/.config/systemd/user/ovos-gui.service /home/$USER/.config/syst
 ln -s /home/$USER/.config/systemd/user/ovos-ggwave.service /home/$USER/.config/systemd/user/default.target.wants/ovos-ggwave.service
 ln -s /home/$USER/.config/systemd/user/ovos-spotify.service /home/$USER/.config/systemd/user/default.target.wants/ovos-spotify.service
 
+echo "Enabling messagebus signals..."
+ln -s /etc/systemd/system/ovos-reboot-signal.service /etc/systemd/system/multi-user.target.wants/ovos-reboot-signal.service
+ln -s /etc/systemd/system/ovos-shutdown-signal.service /etc/systemd/system/multi-user.target.wants/ovos-shutdown-signal.service
+
+echo "Ensuring log file permissions for ovos group..."
+mkdir -p /home/$USER/.local/state/mycroft
+chown -R $TUID:$TGID /home/$USER/.local/state/mycroft
+chmod -R 2775 /home/$USER/.local/state/mycroft
+
 echo "Ensuring permissions for $USER user..."
-# Replace 1000:1000 with the correct UID:GID if needed
 chown -R $TUID:$TGID /home/$USER
+chmod +x /usr/libexec/*
+chmod 644 /home/$USER/.asoundrc
+
+# Enable lingering for the user
+echo "Enabling lingering for $USER user ..."
+mkdir -p /var/lib/systemd/linger
+touch /var/lib/systemd/linger/$USER
+# Ensure correct permissions
+chown root:root /var/lib/systemd/linger/$USER
+chmod 644 /var/lib/systemd/linger/$USER
 
 echo "Cleaning up apt packages..."
 apt-get --purge autoremove -y && apt-get clean

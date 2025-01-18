@@ -51,15 +51,14 @@ jobs:
           PASSWORD: 'ovos'
           HOSTNAME: "raspOVOS"
           CONSTRAINTS: "https://github.com/OpenVoiceOS/ovos-releases/raw/refs/heads/main/constraints-alpha.txt"
-          MYCROFT_CONFIG_FILES: "mycroft.conf,mycroft_es.conf"
         with:
-          base-image-url: https://github.com/OpenVoiceOS/raspOVOS/releases/download/raspOVOS-bookworm-arm64-lite-2025-01-15/raspOVOS-bookworm-arm64-lite.img.xz
+          base-image-url: https://github.com/OpenVoiceOS/raspOVOS/releases/download/raspOVOS-BASE-bookworm-arm64-lite-2025-01-19/raspOVOS-BASE-bookworm-arm64-lite.img.xz
           image-path: raspOVOS-spanish-bookworm-arm64-lite.img
           compress-with-xz: true
           shrink: true
           cache: false
           mount-repository: true
-          env-vars: USER,PASSWORD,HOSTNAME,CONSTRAINTS,MYCROFT_CONFIG_FILES
+          env-vars: USER,PASSWORD,HOSTNAME,CONSTRAINTS
           script-path: build_raspOVOS_es.sh
       - name: Print outputs
         shell: bash
