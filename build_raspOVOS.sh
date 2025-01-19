@@ -175,6 +175,9 @@ add_user_to_group $USER pipewire
 if getent group rtkit > /dev/null 2>&1; then
     add_user_to_group $USER rtkit
 fi
+# added this per ChatGPT recommends
+chown -R $TUID:audio /run/user/$(id -u $TUID)
+chown -R $TUID:audio /dev/snd
 
 # Enable necessary system services.
 echo "Enabling system services..."
