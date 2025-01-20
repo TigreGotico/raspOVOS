@@ -132,7 +132,7 @@ bash /mounted-github-repo/scripts/update.sh
 
 # Install admin phal package and its dependencies.
 echo "Installing admin phal..."
-pip install sdnotify ovos-bus-client ovos-phal ovos-PHAL-plugin-system -c $CONSTRAINTS --break-system-packages
+pip install ovos-bus-client ovos-phal ovos-PHAL-plugin-system -c $CONSTRAINTS --break-system-packages
 
 # Create and activate a virtual environment for OVOS.
 echo "Creating virtual environment..."
@@ -154,15 +154,15 @@ uv pip install --no-progress --pre ovos-docs-viewer ovos-utils[extras] ovos-dink
 
 # Install essential skills for OVOS.
 echo "Installing skills..."
-uv pip install --no-progress --pre ovos-core[skills-essential,skills-audio,skills-media,skills-internet,skills-extra]
+uv pip install --no-progress --pre ovos-core[skills-essential,skills-audio,skills-media,skills-internet,skills-extra] -c $CONSTRAINTS
 
 # Install PHAL plugins for OVOS.
 echo "Installing PHAL plugins..."
-uv pip install --no-progress --pre ovos-phal[extras,linux,mk1] ovos-PHAL-plugin-dotstar ovos-phal-plugin-camera
+uv pip install --no-progress --pre ovos-phal[extras,linux,mk1] ovos-PHAL-plugin-dotstar ovos-phal-plugin-camera -c $CONSTRAINTS
 
 # Install Spotify-related plugins for OVOS.
 echo "Installing OVOS Spotify..."
-uv pip install --no-progress --pre ovos-media-plugin-spotify ovos-skill-spotify
+uv pip install --no-progress --pre ovos-media-plugin-spotify ovos-skill-spotify -c $CONSTRAINTS
 
 # Install deprecated OVOS packages for compatibility with older skills.
 echo "Installing deprecated OVOS packages for compat..."
