@@ -24,7 +24,7 @@ if [ "$USER" != "pi" ]; then
 
   # 4. Change ownership of the new home directory
   echo "Updating file ownership..."
-  chown -R $TUID:$TGID "/home/$USER"
+  chown -R 1000:1000 "/home/$USER"
 
   # 5. Change the password in /etc/shadow
   echo "Changing user password to $PASSWORD..."
