@@ -155,6 +155,53 @@ If you see an **undervoltage detected** warning:
 - Ensure the adapter can supply enough current (e.g., 5A for Raspberry Pi 5).  
 - Replace long or thin cables with shorter, thicker ones for better power delivery.  
 
+## Troubleshooting Wake Word Issues
+
+Wake word detection in raspOVOS offers several options, each with its advantages and limitations. Understanding these can help resolve potential issues and improve performance.
+
+By default, raspOVOS uses the `precise-lite` model with the wake word "hey mycroft." This model was trained by MycroftAI for their Mark2 device. However, there are a few things to consider:
+
+- **Microphone Compatibility:** The performance of precise models can be impacted if the specific properties of your microphone (e.g., sensitivity, frequency response) do not match the data used to train the model. While the default `precise-lite` model was trained with a balanced dataset from a variety of Mycroft users, there is no guarantee it will work optimally with your microphone.
+- **Speaker Demographics:** Precise models, including `precise-lite`, are often trained with datasets predominantly featuring adult male voices. As a result, the model may perform poorly with voices that are outside this demographic, such as children's or women's voices. This is a common issue also seen in Speech-to-Text (STT) models.
+
+### Custom Models
+
+If the default model is not working well for you, consider training your own precise model. Here are some helpful resources for creating a more tailored solution:
+
+- [Helpful Wake Word Datasets on Hugging Face](https://huggingface.co/collections/Jarbas/wake-word-datasets-672cc275fa4bddff9cf69c39)
+- [Data Collection](https://github.com/secretsauceai/wakeword-data-collector)
+- [Wake Word Trainer](https://github.com/secretsauceai/precise-wakeword-model-maker)
+- [precise-lite-trainer Code](https://github.com/OpenVoiceOS/precise-lite-trainer)
+- [Synthetic Data Creation for Wake Words](https://github.com/OpenVoiceOS/ovos-ww-auto-synth-dataset)
+
+### Alternative Wake Word: Vosk Plugin
+
+If you're looking for an alternative to the precise model, the Vosk wake word plugin is another option. 
+
+- [Vosk Wake Word Plugin GitHub](https://github.com/OpenVoiceOS/ovos-ww-plugin-vosk)
+
+One of the main advantages of using the **Vosk Wake Word Plugin** is that it does **not require a training step**. 
+
+Instead, it uses Kaldi with a limited language model, which means it can work out-of-the-box with certain wake words without needing to collect and train custom data. 
+
+However, the performance of Vosk may vary depending on the wake word you choose. Some wake words may work better than others, so it’s essential to test and evaluate the plugin with your chosen word.
+
+### Tips for Choosing a Good Wake Word
+
+Selecting a wake word is crucial to improving the accuracy and responsiveness of your system. Here are some tips for choosing a wake word that will work well in various environments:
+
+- **3 or 4 Syllables:** Wake words that are 3 or 4 syllables long tend to perform better because they are more distinct and less likely to be confused with common words in everyday speech. For example:
+  - **Bad Example:** "Bob" (short, common name)
+  - **Less Bad Example:** "Computer" (common word)
+  - **Good Example:** "Ziggy" (uncommon)
+  - **Better Example:** "Hey Ziggy" (3 syllables, longer)
+  
+- **Uncommon Words:** Choose a wake word that is not often used in regular conversation. This reduces the chance of false triggers when other words sound similar to your wake word. Unique and uncommon names, phrases, or combinations of sounds work best.
+
+- **Clear Pronunciation:** Make sure the wake word has a clear and easy-to-pronounce structure. Words with ambiguous or difficult-to-articulate syllables may cause detection issues, especially in noisy environments.
+
+- **Avoid Overused Words:** Stay away from wake words like "hey" or "hello," as they are often used in daily speech and can trigger false positives. Try combining a less common word with a familiar greeting for better results.
+
 ### Audio Issues  
 
 1. **Check Input Devices:**  
