@@ -175,6 +175,16 @@ add_user_to_group $USER pipewire
 if getent group rtkit > /dev/null 2>&1; then
     add_user_to_group $USER rtkit
 fi
+# Ensure the runtime directory exists
+mkdir -p "/run/user/${TUID}"
+chmod 700 "/run/user/${TUID}"  # Restrict access to the owner only
+chown "${TUID}:${TGID}" "/run/user/${TUID}"  # Set correct ownership
+
+# Ensure the PulseAudio directory exists
+mkdir -p "/run/user/${TUID}/pulse"
+chmod 700 "/run/user/${TUID}/pulse"  # Restrict access to the owner only
+chown "${TUID}:${TGID}" "/run/user/${TUID}/pulse"  # Set correct ownership
+
 
 # Enable necessary system services.
 echo "Enabling system services..."
