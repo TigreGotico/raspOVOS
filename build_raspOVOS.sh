@@ -127,8 +127,8 @@ pip install sdnotify uv --break-system-packages
 echo "Tuning /etc/fstab..."
 bash /mounted-github-repo/scripts/setup_fstab.sh
 
-echo "Updating ovos-i2csound and raspovos-audio-setup"
-bash /mounted-github-repo/scripts/update.sh
+#echo "Updating ovos-i2csound and raspovos-audio-setup"
+#bash /mounted-github-repo/scripts/update.sh
 
 # Install admin phal package and its dependencies.
 echo "Installing admin phal..."
