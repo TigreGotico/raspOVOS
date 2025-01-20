@@ -113,7 +113,7 @@ chmod +x /usr/libexec/ovos*
 chmod +x /usr/local/bin/ovos*
 
 echo "Installing audio packages..."
-apt-get install -y --no-install-recommends pipewire pipewire-alsa pipewire-pulse alsa-utils pulseaudio-utils portaudio19-dev libpulse-dev libasound2-dev
+apt-get install -y --no-install-recommends pipewire pipewire-alsa alsa-utils portaudio19-dev libpulse-dev libasound2-dev
 
 # NOTE: upmpdcli will only work after the overlays due to trusted keys being added there
 echo "Installing extra system packages..."

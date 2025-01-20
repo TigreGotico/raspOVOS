@@ -22,13 +22,13 @@ Check out the [Getting Started Guide](https://github.com/OpenVoiceOS/raspOVOS/bl
 
 The image versions below are considered the latest stable versions
 
-- [raspOVOS-english-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-english-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-dutch-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-dutch-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-catalan-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-catalan-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-german-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-german-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-spanish-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-spanish-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-portuguese-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-portuguese-bookworm-arm64-lite-2024-12-19)
-- [raspOVOS-galician-bookworm-arm64-lite-2024-12-19](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-galician-bookworm-arm64-lite-2024-12-19)
+- [raspOVOS-english-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-english-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-dutch-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-dutch-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-catalan-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-catalan-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-german-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-german-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-spanish-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-spanish-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-portuguese-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-portuguese-bookworm-arm64-lite-2025-01-15)
+- [raspOVOS-galician-bookworm-arm64-lite-2025-01-15](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-galician-bookworm-arm64-lite-2025-01-15)
 
 Are you a developer?
 
