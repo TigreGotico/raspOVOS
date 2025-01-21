@@ -114,8 +114,7 @@ apt install -y --no-install-recommends python3-libcamera python3-kms++ libcap-de
 # Copy raspOVOS overlay to the system.
 echo "Copying raspOVOS overlay..."
 cp -rv /mounted-github-repo/overlays/base/* /
-# TODO - reenable later , should not impact non-mk1 devices
-#cp -rv /mounted-github-repo/overlays/base_mk1/* /
+cp -rv /mounted-github-repo/overlays/base_mk1/* /
 
 # Ensure the correct permissions for binaries
 chmod +x /usr/libexec/*
