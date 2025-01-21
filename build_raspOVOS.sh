@@ -71,7 +71,6 @@ chmod +x /usr/local/bin/*
 echo "Installing uv and sdnotify..."
 pip install sdnotify uv --break-system-packages
 
-
 # Install admin phal package and its dependencies.
 echo "Installing admin phal..."
 pip install ovos-bus-client ovos-phal ovos-PHAL-plugin-system -c $CONSTRAINTS --break-system-packages
