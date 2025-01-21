@@ -117,7 +117,7 @@ chmod +x /usr/local/bin/*
 
 # NOTE: upmpdcli will only work after the overlays due to trusted keys being added there
 echo "Installing extra system packages..."
-apt-get install -y --no-install-recommends upmpdcli
+apt-get update && apt-get install -y --no-install-recommends upmpdcli
 
 # Configure user groups for audio management.
 echo "Configuring audio..."
