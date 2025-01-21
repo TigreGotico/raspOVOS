@@ -48,6 +48,12 @@ disable_splash=1
 # Reduce GPU memory allocation for headless setup
 gpu_mem=16
 
+# If you upgraded your Mark1 to a rpi4/5 adjust the model below
+[pi3]
+# Apply this setting only if the Raspberry Pi is a 3 model
+# WARNING: without this the Mark1 will not work
+dtoverlay=miniuart-bt
+
 [cm4]
 # Enable host mode on the 2711 built-in XHCI USB controller.
 # This line should be removed if the legacy DWC2 controller is required

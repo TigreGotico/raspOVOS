@@ -98,6 +98,10 @@ fi
 
 echo "The UID for '$USER' is: $TUID"
 
+echo "Disabling console serial for Mark1 support"
+# MK1 wont be able to talk to the arduino otherwise
+sed -i 's/console=serial0,115200//g' /boot/firmware/cmdline.txt
+
 # Update package list and install necessary system tools.
 # Installs required packages and purges unnecessary ones.
 echo "Updating base system..."
@@ -114,7 +118,6 @@ apt install -y --no-install-recommends python3-libcamera python3-kms++ libcap-de
 # Copy raspOVOS overlay to the system.
 echo "Copying raspOVOS overlay..."
 cp -rv /mounted-github-repo/overlays/base/* /
-cp -rv /mounted-github-repo/overlays/base_mk1/* /
 
 # Ensure the correct permissions for binaries
 chmod +x /usr/libexec/*
