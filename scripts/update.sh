@@ -1,5 +1,5 @@
-# TODO - flesh out and include in image
-apt-get install -y --no-install-recommends pulseaudio-utils  i2c-tools
+# TODO - flesh out and include in image as /usr/local/bin/ovos-update
+#  also see current alias in .bash_aliases
 
 echo "Updating raspovos-audio-setup..."
 git clone https://github.com/OpenVoiceOS/raspovos-audio-setup /tmp/raspovos-audio-setup

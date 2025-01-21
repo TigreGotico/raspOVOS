@@ -8,17 +8,6 @@ on:
     paths:
       - '.github/workflows/build_base.yml'
       - 'build_base.sh'
-      - 'tuning/**'
-      - 'services/kdeconnect.service'
-      - 'services/wlan0-power.service'
-      - 'packages/setup_pipewire.sh'
-      - 'packages/setup_kdeconnect.sh'
-      - 'packages/setup_balena_wifi.sh'
-      - 'packages/wifi-connect/**'
-      - 'packages/wifi-connect.bin'
-      - 'patches/firstboot'
-      - 'patches/userconf'
-      - 'patches/boot_config.txt'
 
 jobs:
   # Stage 1: Get Current Date and Release Name

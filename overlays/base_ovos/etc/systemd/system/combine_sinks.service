@@ -1,0 +1,15 @@
+[Unit]
+Description=Sound Sink auto-combiner service
+Requires=systemd-modules-load.service
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+User=1000
+ExecStart=/usr/libexec/update-audio-sinks
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
