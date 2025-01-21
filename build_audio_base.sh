@@ -109,7 +109,7 @@ echo "Installing audio packages..."
 apt-get install -y --no-install-recommends pipewire pipewire-alsa alsa-utils portaudio19-dev libpulse-dev libasound2-dev mpd mpv kdeconnect
 
 echo "Installing camera packages..."
-apt install -y python3-libcamera python3-kms++ libcap-dev
+apt install -y --no-install-recommends python3-libcamera python3-kms++ libcap-dev
 
 # Copy raspOVOS overlay to the system.
 echo "Copying raspOVOS overlay..."
