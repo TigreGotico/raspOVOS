@@ -106,7 +106,7 @@ apt-get update
 apt-get install -y --no-install-recommends jq git unzip curl build-essential fake-hwclock userconf-pi mosh systemd-zram-generator i2c-tools
 
 echo "Installing audio packages..."
-apt-get install -y --no-install-recommends pipewire pipewire-alsa alsa-utils portaudio19-dev libpulse-dev libasound2-dev mpd mpv kdeconnect
+apt-get install -y --no-install-recommends pipewire wireplumber pipewire-alsa alsa-utils portaudio19-dev libpulse-dev libasound2-dev mpd mpv kdeconnect
 
 echo "Installing camera packages..."
 apt install -y --no-install-recommends python3-libcamera python3-kms++ libcap-dev
@@ -114,6 +114,9 @@ apt install -y --no-install-recommends python3-libcamera python3-kms++ libcap-de
 # Copy raspOVOS overlay to the system.
 echo "Copying raspOVOS overlay..."
 cp -rv /mounted-github-repo/overlays/base/* /
+# TODO - reenable later , should not impact non-mk1 devices
+#cp -rv /mounted-github-repo/overlays/base_mk1/* /
+
 # Ensure the correct permissions for binaries
 chmod +x /usr/libexec/*
 
@@ -140,9 +143,6 @@ ln -s /etc/systemd/system/sshd.service /etc/systemd/system/multi-user.target.wan
 ln -s /etc/systemd/system/kdeconnect.service /etc/systemd/system/multi-user.target.wants/kdeconnect.service
 ln -s /usr/lib/systemd/system/mpd.service /etc/systemd/system/multi-user.target.wants/mpd.service
 ln -s /usr/lib/systemd/system/systemd-zram-setup@.service /etc/systemd/system/multi-user.target.wants/systemd-zram-setup@zram0.service
-
-# TODO - investigate better audio setup mechanism
-# ln -s /etc/systemd/system/autoconfigure_soundcard.service /etc/systemd/system/multi-user.target.wants/autoconfigure_soundcard.service
 
 echo "Ensuring permissions for $USER user..."
 chmod 644 /home/$USER/.asoundrc
