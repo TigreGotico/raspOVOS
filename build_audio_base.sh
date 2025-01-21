@@ -116,7 +116,6 @@ echo "Copying raspOVOS overlay..."
 cp -rv /mounted-github-repo/overlays/base/* /
 # Ensure the correct permissions for binaries
 chmod +x /usr/libexec/*
-chmod +x /usr/local/bin/*
 
 # NOTE: upmpdcli will only work after the overlays due to trusted keys being added there
 echo "Installing extra system packages..."
