@@ -1,4 +1,4 @@
-name: build base image
+name: build base ovos image
 
 on:
   workflow_dispatch:
