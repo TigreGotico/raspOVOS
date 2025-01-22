@@ -1,0 +1,15 @@
+[Unit]
+Description=Sound card autoconfiguration service
+After=sound.target
+Wants=sound.target
+
+[Service]
+Type=oneshot
+User=1000
+ExecStart=/usr/libexec/soundcard-autoconfigure
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

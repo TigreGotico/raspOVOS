@@ -138,6 +138,7 @@ bash /mounted-github-repo/scripts/setup_fstab.sh
 echo "Enabling system services..."
 chmod 644 /etc/systemd/system/kdeconnect.service
 ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
+ln -s /etc/systemd/system/autoconfigure_soundcard.service /etc/systemd/system/multi-user.target.wants/autoconfigure_soundcard.service
 ln -s /etc/systemd/system/sshd.service /etc/systemd/system/multi-user.target.wants/sshd.service
 ln -s /etc/systemd/system/kdeconnect.service /etc/systemd/system/multi-user.target.wants/kdeconnect.service
 ln -s /usr/lib/systemd/system/mpd.service /etc/systemd/system/multi-user.target.wants/mpd.service
