@@ -98,7 +98,6 @@ fi
 
 echo "The UID for '$USER' is: $TUID"
 
-
 # Update package list and install necessary system tools.
 # Installs required packages and purges unnecessary ones.
 echo "Updating base system..."
@@ -138,7 +137,8 @@ bash /mounted-github-repo/scripts/setup_fstab.sh
 # Enable necessary system services.
 echo "Enabling system services..."
 chmod 644 /etc/systemd/system/kdeconnect.service
-ln -s /etc/systemd/system/sshd.service /etc/systemd/system/multi-user.target.wants/
+ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
+ln -s /etc/systemd/system/sshd.service /etc/systemd/system/multi-user.target.wants/sshd.service
 ln -s /etc/systemd/system/kdeconnect.service /etc/systemd/system/multi-user.target.wants/kdeconnect.service
 ln -s /usr/lib/systemd/system/mpd.service /etc/systemd/system/multi-user.target.wants/mpd.service
 ln -s /usr/lib/systemd/system/systemd-zram-setup@.service /etc/systemd/system/multi-user.target.wants/systemd-zram-setup@zram0.service
