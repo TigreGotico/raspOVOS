@@ -8,7 +8,7 @@ on:
     paths:
       - '.github/workflows/build_img_es.yml'
       - 'build_raspOVOS_es.sh'
-      - 'intent_cache/es-ES/**'
+      - 'overlays/es/**'
 
 jobs:
   # Stage 1: Get Current Date and Release Name
@@ -52,7 +52,7 @@ jobs:
           HOSTNAME: "raspOVOS"
           CONSTRAINTS: "https://github.com/OpenVoiceOS/ovos-releases/raw/refs/heads/main/constraints-alpha.txt"
         with:
-          base-image-url: https://github.com/OpenVoiceOS/raspOVOS/releases/download/raspOVOS-DEV-bookworm-arm64-lite-2025-01-19/raspOVOS-DEV-bookworm-arm64-lite.img.xz
+          base-image-url: https://github.com/TigreGotico/raspOVOS/releases/download/raspOVOS-DEV-bookworm-arm64-lite-2025-01-22/raspOVOS-DEV-bookworm-arm64-lite.img.xz
           image-path: raspOVOS-spanish-bookworm-arm64-lite.img
           compress-with-xz: true
           shrink: true
