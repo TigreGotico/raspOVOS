@@ -113,10 +113,7 @@ uv pip install --no-progress --pre ovos-lingua-franca ovos-backend-client -c $CO
 echo "Enabling system services..."
 chmod 644 /etc/systemd/system/ovos-admin-phal.service
 chmod 644 /etc/systemd/system/splashscreen.service
-chmod 644 /etc/systemd/system/i2csound.service
-ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
 ln -s /etc/systemd/system/ovos-admin-phal.service /etc/systemd/system/multi-user.target.wants/ovos-admin-phal.service
-ln -s /etc/systemd/system/i2csound.service /etc/systemd/system/multi-user.target.wants/i2csound.service
 ln -s /etc/systemd/system/splashscreen.service /etc/systemd/system/multi-user.target.wants/splashscreen.service
 
 # Enable user systemd services.
