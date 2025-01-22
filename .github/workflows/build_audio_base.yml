@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/build_audio_base.yml'
       - 'build_audio_base.sh'
+      - 'overlays/base/**'
 
 jobs:
   # Stage 1: Get Current Date and Release Name
