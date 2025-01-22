@@ -98,9 +98,6 @@ fi
 
 echo "The UID for '$USER' is: $TUID"
 
-echo "Disabling console serial for Mark1 support"
-# MK1 wont be able to talk to the arduino otherwise
-sed -i 's/console=serial0,115200//g' /boot/firmware/cmdline.txt
 
 # Update package list and install necessary system tools.
 # Installs required packages and purges unnecessary ones.
