@@ -1,0 +1,2 @@
+#!/bin/bash
+~/.venvs/ovos/bin/python -c "~/.venvs/ovos/bin/python -c \"from ovos_plugin_manager.language import find_tx_plugins; from ovos_utils.log import LOG; LOG.set_level('ERROR'); from pprint import pprint; pprint(find_tx_plugins())"

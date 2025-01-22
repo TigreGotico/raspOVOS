@@ -1,0 +1,2 @@
+#!/bin/bash
+~/.venvs/ovos/bin/python -c "from ovos_plugin_manager.skills import get_installed_skill_ids; from ovos_utils.log import LOG; LOG.set_level('ERROR'); from pprint import pprint; pprint(get_installed_skill_ids())"

@@ -1,0 +1,7 @@
+#!/bin/bash
+# TODO add prompt to confirm, all skills will be deleted
+
+uv pip list | grep skill | awk '{print $1}' | xargs uv pip uninstall
+
+# TODO - echo note about config not being touched and pipeline plugins still influencing intent matching
+# only skills are deleted by this command

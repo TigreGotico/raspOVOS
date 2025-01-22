@@ -1,0 +1,19 @@
+#!/bin/bash
+# ovos-update-script
+# This script updates OpenVoiceOS packages based on the specified tag.
+
+# Set the default tag
+TAG=$(cat /opt/ovos/tag)  # alpha, testing, stable
+
+# Set the constraints file based on the tag
+CONSTRAINTS="https://github.com/OpenVoiceOS/ovos-releases/raw/refs/heads/main/constraints-$TAG.txt"
+
+# Get the list of installed packages that match the pattern
+INSTALLED_PACKAGES=$(uv pip list --format=freeze | grep -E 'ovos-|skill-' | cut -d '=' -f 1)
+
+# Update packages based on the tag
+if [[ "$TAG" == "alpha" ]]; then
+  uv pip install -c "$CONSTRAINTS" -U --pre $INSTALLED_PACKAGES "$@"
+else
+  uv pip install -c "$CONSTRAINTS" -U $INSTALLED_PACKAGES "$@"
+fi
