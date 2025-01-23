@@ -13,3 +13,4 @@ RestartSec=10
 
 [Install]
 WantedBy=sound.target
+WantedBy=i2csound.service
