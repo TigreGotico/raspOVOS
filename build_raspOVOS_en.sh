@@ -17,18 +17,18 @@ echo "Setting up default wifi country..."
 echo "Installing Piper TTS..."
 uv pip install --no-progress ovos-tts-plugin-piper -c $CONSTRAINTS
 
-echo "Installing Mimic TTS (for G2P)"
-apt-get -y --no-install-recommends install gcc make pkg-config automake libtool libasound2-dev libicu-dev
-MIMIC_VERSION=1.2.0.2
-git clone --branch ${MIMIC_VERSION} https://github.com/MycroftAI/mimic.git --depth=1 /tmp/mimic
-cd /tmp/mimic
-./autogen.sh
-./configure --with-audio=alsa --enable-shared --prefix="$(pwd)"
-make
-make install
-rm -rf /tmp/mimic
-
-uv pip install --no-progress ovos-tts-plugin-mimic -c $CONSTRAINTS
+# TODO - compile minimal without bundled voices
+#echo "Installing Mimic TTS (for G2P)"
+#apt-get -y --no-install-recommends install gcc make pkg-config automake libtool libasound2-dev libicu-dev
+#MIMIC_VERSION=1.2.0.2
+#git clone --branch ${MIMIC_VERSION} https://github.com/MycroftAI/mimic.git --depth=1 /tmp/mimic
+#cd /tmp/mimic
+#./autogen.sh
+#./configure --with-audio=alsa --enable-shared --prefix="$(pwd)"
+#make
+#make install
+#rm -rf /tmp/mimic
+#uv pip install --no-progress ovos-tts-plugin-mimic -c $CONSTRAINTS
 
 # download default piper voice for english  (change this for other languages)
 PIPER_DIR="/home/$USER/.local/share/piper_tts/voice-en-gb-alan-low"
