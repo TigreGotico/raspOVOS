@@ -213,18 +213,50 @@ setup_card() {
     esac
 }
 
-# Wait for ovos-i2csound to complete setup
-sleep 1
-
 # Read i2c platform configuration from file
 if [ -f /etc/OpenVoiceOS/i2c_platform ]; then
     i2c_platform=$(cat /etc/OpenVoiceOS/i2c_platform)
 else
-    log_message "/etc/OpenVoiceOS/i2c_platform not found."
-    i2c_platform=""
+    sleep 1
+    # Read i2c platform configuration from file
+    if [ -f /etc/OpenVoiceOS/i2c_platform ]; then
+        i2c_platform=$(cat /etc/OpenVoiceOS/i2c_platform)
+    else
+        log_message "/etc/OpenVoiceOS/i2c_platform not found."
+        i2c_platform=""
+    fi
 fi
 
-log_message "$(aplay -l)"  # Log detected soundcards
+# Function to check available soundcards
+check_soundcards() {
+    local retries=3
+    local attempt=1
+    local soundcards
+
+    # Retry up to 3 times if no output from aplay
+    while [[ $attempt -le $retries ]]; do
+        soundcards=$(aplay -l)
+
+        # If aplay returns no output or an error, retry after sleeping for 3 seconds
+        if [[ -z "$soundcards" ]]; then
+            log_message "No soundcards detected. Attempt $attempt of $retries. Retrying in 3 seconds..."
+            sleep 3
+            ((attempt++))
+        else
+            log_message "Soundcards detected:"
+            log_message "$soundcards"
+            return 0
+        fi
+    done
+
+    # If no soundcards detected after retries, log the failure
+    log_message "ERROR: No soundcards detected after $retries attempts."
+    return 1
+}
+
+# acts as a delay to ensure audio is fully loaded
+check_soundcards
+
 
 # Function to set up Respeaker 2mic soundcard
 setup_wm8960_soundcard() {

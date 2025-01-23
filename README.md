@@ -36,12 +36,6 @@ Find the latest developer builds on the [Releases](https://github.com/OpenVoiceO
 
 > ⚠️ These builds are semi-automated and might not be well tested in comparison to the versions listed above
 
-The intermediate images might also be of interest
-
-- [raspOVOS-NO-OVOS-bookworm-arm64-lite-2024-12-27](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-NO-OVOS-bookworm-arm64-lite-2024-12-27) -
-  base optimized bookworm image, without OVOS installed
-- [raspOVOS-bookworm-arm64-lite-2024-12-27](https://github.com/OpenVoiceOS/raspOVOS/releases/tag/raspOVOS-bookworm-arm64-lite-2024-12-27) -
-  OVOS installed, but no language specific optimizations applied
 
 ---
 
